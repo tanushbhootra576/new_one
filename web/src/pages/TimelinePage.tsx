@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Sparkles, Pill, FlaskConical, Calendar, Bell, CheckCircle2, AlertCircle, Clock } from "lucide-react";
 import { getTimeline } from "@/api/client";
-import type { TimelineDay, TimelineItem } from "@/types/models";
+import type { TimelineDay } from "@/types/models";
 import { cn } from "@/lib/utils";
 
 const typeIcons = {

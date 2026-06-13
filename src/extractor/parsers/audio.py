@@ -8,20 +8,20 @@ STT_MODEL = "scribe_v2"
 # Medical keyterms injected by default to improve recognition accuracy.
 # Extend this list with domain-specific drug names and procedure names as needed.
 DEFAULT_MEDICAL_KEYTERMS: list[str] = [
-    "ordonnance",
-    "posologie",
-    "comprimé",
-    "gélule",
-    "perfusion",
-    "chirurgie",
-    "anesthésie",
+    "prescription",
+    "dosage",
+    "tablet",
+    "capsule",
+    "infusion",
+    "surgery",
+    "anesthesia",
     "suture",
-    "scanner",
-    "IRM",
-    "échographie",
-    "biopsie",
-    "antibiothérapie",
-    "corticoïde",
+    "CT scan",
+    "MRI",
+    "ultrasound",
+    "biopsy",
+    "antibiotic therapy",
+    "corticosteroid",
     "anticoagulant",
 ]
 

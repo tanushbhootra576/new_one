@@ -189,3 +189,17 @@ export interface TimelineDay {
   date: string | null;
   items: TimelineItem[];
 }
+
+export interface CoachContext {
+  patient_card: Record<string, unknown>;
+  timeline: Record<string, unknown>[];
+}
+
+export interface CoachSummary {
+  daily_summary: string;
+  priorities: string[];
+  risks: string[];
+  questions: string[];
+  encouragement: string;
+  follow_up: string[];
+}

@@ -11,6 +11,8 @@ import type {
   TimelineDay,
   UploadResponse,
   ValidatedAction,
+  CoachContext,
+  CoachSummary,
 } from "@/types/models";
 import { mockUploadResponse, mockActionPlan, mockDocuments, mockClinicalNote } from "@/fixtures/urology_case";
 
@@ -225,4 +227,31 @@ export async function markNotificationRead(id: string): Promise<void> {
   if (USE_MOCKS) return;
   const response = await fetch(`/api/patient/notifications/${id}/read`, { method: "POST" });
   if (!response.ok) throw new Error("Failed to mark notification read");
+}
+
+export async function getCoachSummary(context: CoachContext): Promise<CoachSummary> {
+  if (USE_MOCKS) {
+    await delay(1500);
+    return {
+      daily_summary: "You are doing great on your recovery journey. Keep taking your medications and resting.",
+      priorities: ["Take Lithium 400mg", "Drink plenty of water"],
+      risks: ["Watch out for lithium toxicity signs like nausea."],
+      questions: ["When can I resume normal activities?", "Should I continue taking Amoxicillin?"],
+      encouragement: "Every step forward is progress. You've got this!",
+      follow_up: ["Rest well", "Maintain regular diet"]
+    };
+  }
+
+  const response = await fetch("/api/coach", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(context),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`POST /api/coach failed: ${response.status} — ${text}`);
+  }
+
+  return response.json() as Promise<CoachSummary>;
 }

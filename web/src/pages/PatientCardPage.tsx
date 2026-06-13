@@ -8,7 +8,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   Share2,
-  QrCode,
   ArrowLeft,
   Sparkles,
   FlaskConical,
@@ -29,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { SharePatientCard } from "@/components/SharePatientCard";
 
 function downloadIcs(title: string, icsContent: string) {
   const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
@@ -55,6 +55,7 @@ export default function PatientCardPage() {
   const [execution, setExecution] = useState<ExecutionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { unreadCount } = useNotifications();
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     const storedPlan = sessionStorage.getItem("plan");
@@ -129,7 +130,14 @@ export default function PatientCardPage() {
             <Sparkles className="h-4 w-4 text-white" />
           </div>
           <span className="text-lg font-bold text-alan-text-primary">CuraPath</span>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={() => setShareOpen(true)}
+              className="rounded-full p-2 text-alan-text-muted hover:bg-alan-surface transition-colors"
+              title="Share Patient Card"
+            >
+              <Share2 className="h-5 w-5" />
+            </button>
             <button
               onClick={() => navigate("/notifications")}
               className="relative rounded-full p-2 text-alan-text-muted hover:bg-alan-surface transition-colors"
@@ -361,6 +369,13 @@ export default function PatientCardPage() {
           </Card>
         )}
       </main>
+
+      <SharePatientCard 
+        open={shareOpen} 
+        onOpenChange={setShareOpen} 
+        card={card} 
+        acceptedActions={acceptedActions} 
+      />
     </div>
   );
 }

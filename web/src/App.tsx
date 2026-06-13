@@ -5,6 +5,7 @@ import PatientCardPage from "@/pages/PatientCardPage";
 import MedicationTrackerPage from "@/pages/MedicationTrackerPage";
 import TimelinePage from "@/pages/TimelinePage";
 import NotificationCenterPage from "@/pages/NotificationCenterPage";
+import DashboardPage from "@/pages/DashboardPage";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 
 export default function App() {
@@ -12,7 +13,8 @@ export default function App() {
     <NotificationProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<UploadPage />} />
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/upload" element={<UploadPage />} />
           <Route path="/plan" element={<PlanPage />} />
           <Route path="/card" element={<PatientCardPage />} />
           <Route path="/medications" element={<MedicationTrackerPage />} />

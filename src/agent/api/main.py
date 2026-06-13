@@ -24,6 +24,8 @@ from ..domain.models.actions import Action, ActionPlan
 from ..domain.models.execution import ActionDecision, ExecutionResult
 from ..domain.models.timeline import TimelineDay
 from ..domain.models.vault import ActionStatus, DoseStatus, MedicationSchedule, PatientCard, PatientHistory, Notification
+from ..domain.models.coach import CoachContext, CoachSummary
+from ..adapters.mistral_coach import MistralCoach
 
 load_dotenv()
 
@@ -122,6 +124,15 @@ def get_notification_service() -> NotificationService:
     if _notification_service is None:
         _notification_service = NotificationService(repository=get_repository())
     return _notification_service
+
+
+_coach_service: MistralCoach | None = None
+
+def get_coach_service() -> MistralCoach:
+    global _coach_service
+    if _coach_service is None:
+        _coach_service = MistralCoach(_mistral_client())
+    return _coach_service
 
 
 # --- App -------------------------------------------------------------------
@@ -306,3 +317,8 @@ def mark_notification_read(notification_id: str) -> dict[str, str]:
     service = get_notification_service()
     service.mark_as_read(patient_id=DEMO_PATIENT_ID, notification_id=notification_id)
     return {"status": "ok"}
+
+
+@app.post("/api/coach", response_model=CoachSummary)
+def generate_coach_summary(context: CoachContext) -> CoachSummary:
+    return get_coach_service().generate_summary(context)
