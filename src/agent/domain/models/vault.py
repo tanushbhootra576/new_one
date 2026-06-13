@@ -130,3 +130,8 @@ class PatientHistory(BaseModel):
     timeline: list[Event] = Field(default_factory=list)
     medication_schedules: list[MedicationSchedule] = Field(default_factory=list)
     notifications: list[Notification] = Field(default_factory=list)
+
+
+class PatientSearchResult(BaseModel):
+    id: str
+    card: PatientCard

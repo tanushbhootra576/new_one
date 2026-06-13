@@ -26,7 +26,7 @@ from ..app.timeline_service import TimelineService
 from ..domain.models.actions import Action, ActionPlan
 from ..domain.models.execution import ActionDecision, ExecutionResult
 from ..domain.models.timeline import TimelineDay
-from ..domain.models.vault import ActionStatus, DoseStatus, MedicationSchedule, PatientCard, PatientHistory, Notification
+from ..domain.models.vault import ActionStatus, DoseStatus, MedicationSchedule, PatientCard, PatientHistory, Notification, PatientSearchResult
 from ..domain.models.coach import CoachContext, CoachSummary
 from ..adapters.mistral_coach import MistralCoach
 
@@ -146,6 +146,11 @@ def get_patient_id(user: User = Depends(get_current_user), patient_id: str | Non
         return patient_id
     raise HTTPException(status_code=403, detail="Unknown role")
 
+def get_doctor(user: User = Depends(get_current_user)) -> User:
+    if user.role != UserRole.DOCTOR:
+        raise HTTPException(status_code=403, detail="Doctor access required")
+    return user
+
 # --- App -------------------------------------------------------------------
 
 app = FastAPI(title="Arwen Agent API", version="0.3.0")
@@ -193,6 +198,19 @@ def get_profile(user: User = Depends(get_current_user)):
         "role": user.role,
         "patient_id": user.patient_id
     }
+
+@app.get("/api/doctor/patients/search", response_model=list[PatientSearchResult])
+def search_patients(query: str, doctor: User = Depends(get_doctor)):
+    return get_db().search_patients(query)
+
+@app.get("/api/doctor/patients/{patient_id}/card", response_model=PatientCard)
+def get_patient_for_doctor(patient_id: str, doctor: User = Depends(get_doctor)):
+    return get_db().get_patient_card(patient_id)
+
+@app.put("/api/doctor/patients/{patient_id}/card", response_model=PatientCard)
+def update_patient_card_for_doctor(patient_id: str, card: PatientCard, doctor: User = Depends(get_doctor)):
+    get_db().update_patient_card(patient_id, card)
+    return get_db().get_patient_card(patient_id)
 
 @app.get("/api/health")
 def health() -> dict[str, str]:

@@ -15,6 +15,7 @@ from ..domain.models.vault import (
     PatientCard,
     PatientHistory,
     StoredActionPlan,
+    PatientSearchResult,
 )
 
 logger = logging.getLogger(__name__)
@@ -226,6 +227,34 @@ class ArwenDatabaseClient(PatientRepository):
             self._mock_db["patients"].append(card_dict)
             return
         self.db["patients"].replace_one({"id": patient_id}, card_dict, upsert=True)
+
+    def search_patients(self, query: str) -> List[PatientSearchResult]:
+        if self.is_mock:
+            results = []
+            q = query.lower()
+            for p in self._mock_db["patients"]:
+                pid = str(p.get("id", ""))
+                name = str(p.get("name", ""))
+                if q in pid.lower() or q in name.lower():
+                    p_copy = dict(p)
+                    p_copy.pop("id", None)
+                    p_copy.pop("_id", None)
+                    results.append(PatientSearchResult(id=pid, card=PatientCard(**p_copy)))
+            return results
+        
+        cursor = self.db["patients"].find({
+            "$or": [
+                {"id": {"$regex": query, "$options": "i"}},
+                {"name": {"$regex": query, "$options": "i"}}
+            ]
+        })
+        results = []
+        for doc in cursor:
+            doc.pop("_id", None)
+            pid = doc.pop("id", None)
+            if not pid: continue
+            results.append(PatientSearchResult(id=pid, card=PatientCard(**doc)))
+        return results
 
     def save_consultation(self, patient_id: str, consultation: Consultation) -> None:
         doc_dict = consultation.model_dump()

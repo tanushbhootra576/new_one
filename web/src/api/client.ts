@@ -464,3 +464,67 @@ export async function getProfile(): Promise<UserProfile> {
   if (!response.ok) throw new Error("Failed to fetch profile");
   return response.json() as Promise<UserProfile>;
 }
+
+// ─── Doctor Endpoints ─────────────────────────────────────────────────────────
+
+export interface PatientSearchResult {
+  id: string;
+  card: PatientCard;
+}
+
+export async function searchPatients(query: string): Promise<PatientSearchResult[]> {
+  if (USE_MOCKS) {
+    await delay(500);
+    return [
+      {
+        id: "pat_1234567890ab",
+        card: {
+          name: "Pierre Muller",
+          address: null,
+          active_conditions: ["Urolithiasis — calculus 8mm"],
+          current_treatments: ["Lithium (Téralithe 400) 400mg"],
+          regular_followups: ["Dr. Laurent Muller"],
+          upcoming_procedures: ["Ureteroscopy — 2026-04-24"],
+          drug_interactions: ["Lithium × renal procedure"],
+          last_updated: new Date().toISOString(),
+        }
+      }
+    ].filter(p => p.card.name?.toLowerCase().includes(query.toLowerCase()) || p.id.toLowerCase().includes(query.toLowerCase()));
+  }
+  const response = await fetch(`/api/doctor/patients/search?query=${encodeURIComponent(query)}`, { headers: getAuthHeaders() });
+  if (!response.ok) throw new Error("Failed to search patients");
+  return response.json() as Promise<PatientSearchResult[]>;
+}
+
+export async function getPatientForDoctor(patientId: string): Promise<PatientCard> {
+  if (USE_MOCKS) {
+    await delay(300);
+    return {
+      name: "Pierre Muller",
+      address: null,
+      active_conditions: ["Urolithiasis — calculus 8mm"],
+      current_treatments: ["Lithium (Téralithe 400) 400mg"],
+      regular_followups: ["Dr. Laurent Muller"],
+      upcoming_procedures: ["Ureteroscopy — 2026-04-24"],
+      drug_interactions: ["Lithium × renal procedure"],
+      last_updated: new Date().toISOString(),
+    };
+  }
+  const response = await fetch(`/api/doctor/patients/${patientId}/card`, { headers: getAuthHeaders() });
+  if (!response.ok) throw new Error("Failed to get patient card");
+  return response.json() as Promise<PatientCard>;
+}
+
+export async function updatePatientCardForDoctor(patientId: string, card: PatientCard): Promise<PatientCard> {
+  if (USE_MOCKS) {
+    await delay(500);
+    return card;
+  }
+  const response = await fetch(`/api/doctor/patients/${patientId}/card`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+    body: JSON.stringify(card),
+  });
+  if (!response.ok) throw new Error("Failed to update patient card");
+  return response.json() as Promise<PatientCard>;
+}
