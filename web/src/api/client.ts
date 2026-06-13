@@ -18,6 +18,21 @@ import { mockUploadResponse, mockActionPlan, mockDocuments, mockClinicalNote } f
 
 const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === "true";
 
+function getAuthHeaders(): Record<string, string> {
+  const token = localStorage.getItem("token");
+  return token ? { "Authorization": `Bearer ${token}` } : {};
+}
+
+function buildUrl(path: string): string {
+  const patientId = localStorage.getItem("active_patient_id");
+  if (patientId) {
+    const sep = path.includes("?") ? "&" : "?";
+    return `${path}${sep}patient_id=${encodeURIComponent(patientId)}`;
+  }
+  return path;
+}
+
+
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -43,9 +58,10 @@ export async function uploadDocuments(
     formData.append("audio", audio);
   }
 
-  const response = await fetch("/api/upload", {
+  const response = await fetch(buildUrl("/api/upload"), {
     method: "POST",
     body: formData,
+    headers: getAuthHeaders(),
   });
 
   if (!response.ok) {
@@ -69,9 +85,9 @@ export async function getPlan(
     return mockActionPlan;
   }
 
-  const response = await fetch("/api/plan", {
+  const response = await fetch(buildUrl("/api/plan"), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
     body: JSON.stringify({ documents, clinical_note }),
   });
 
@@ -141,9 +157,9 @@ export async function executePlan(
     decisions: backendDecisions,
   };
 
-  const response = await fetch("/api/execute", {
+  const response = await fetch(buildUrl("/api/execute"), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
     body: JSON.stringify(body),
   });
 
@@ -173,7 +189,7 @@ export async function getPatientCard(): Promise<PatientCard> {
     };
   }
 
-  const response = await fetch("/api/patient/card");
+  const response = await fetch(buildUrl("/api/patient/card"), { headers: getAuthHeaders() });
   if (!response.ok) {
     const text = await response.text();
     throw new Error(`GET /api/patient/card failed: ${response.status} — ${text}`);
@@ -189,20 +205,20 @@ export async function getMedications(): Promise<MedicationsResponse> {
       adherence_score: 100,
     };
   }
-  const response = await fetch("/api/patient/medications");
+  const response = await fetch(buildUrl("/api/patient/medications"), { headers: getAuthHeaders() });
   if (!response.ok) throw new Error("Failed to fetch medications");
   return response.json() as Promise<MedicationsResponse>;
 }
 
 export async function markDoseTaken(scheduleId: string, doseId: string): Promise<void> {
   if (USE_MOCKS) { await delay(200); return; }
-  const response = await fetch(`/api/patient/medications/${scheduleId}/doses/${doseId}/mark-taken`, { method: "POST" });
+  const response = await fetch(buildUrl(`/api/patient/medications/${scheduleId}/doses/${doseId}/mark-taken`), { method: "POST", headers: getAuthHeaders() });
   if (!response.ok) throw new Error("Failed to mark dose taken");
 }
 
 export async function skipDose(scheduleId: string, doseId: string): Promise<void> {
   if (USE_MOCKS) { await delay(200); return; }
-  const response = await fetch(`/api/patient/medications/${scheduleId}/doses/${doseId}/skip`, { method: "POST" });
+  const response = await fetch(buildUrl(`/api/patient/medications/${scheduleId}/doses/${doseId}/skip`), { method: "POST", headers: getAuthHeaders() });
   if (!response.ok) throw new Error("Failed to skip dose");
 }
 
@@ -211,21 +227,21 @@ export async function getTimeline(): Promise<TimelineDay[]> {
     await delay(200);
     return [];
   }
-  const response = await fetch("/api/patient/timeline");
+  const response = await fetch(buildUrl("/api/patient/timeline"), { headers: getAuthHeaders() });
   if (!response.ok) throw new Error("Failed to fetch timeline");
   return response.json() as Promise<TimelineDay[]>;
 }
 
 export async function getNotifications(): Promise<Notification[]> {
   if (USE_MOCKS) return [];
-  const response = await fetch("/api/patient/notifications");
+  const response = await fetch(buildUrl("/api/patient/notifications"), { headers: getAuthHeaders() });
   if (!response.ok) throw new Error("Failed to fetch notifications");
   return response.json() as Promise<Notification[]>;
 }
 
 export async function markNotificationRead(id: string): Promise<void> {
   if (USE_MOCKS) return;
-  const response = await fetch(`/api/patient/notifications/${id}/read`, { method: "POST" });
+  const response = await fetch(buildUrl(`/api/patient/notifications/${id}/read`), { method: "POST", headers: getAuthHeaders() });
   if (!response.ok) throw new Error("Failed to mark notification read");
 }
 
@@ -242,9 +258,9 @@ export async function getCoachSummary(context: CoachContext): Promise<CoachSumma
     };
   }
 
-  const response = await fetch("/api/coach", {
+  const response = await fetch(buildUrl("/api/coach"), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
     body: JSON.stringify(context),
   });
 

@@ -203,3 +203,21 @@ export interface CoachSummary {
   encouragement: string;
   follow_up: string[];
 }
+
+export enum UserRole {
+  PATIENT = "PATIENT",
+  DOCTOR = "DOCTOR",
+}
+
+export interface User {
+  id: string;
+  email: string;
+  role: UserRole;
+  name: string;
+  patient_id: string | null;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: User;
+}

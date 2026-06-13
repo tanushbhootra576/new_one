@@ -16,6 +16,7 @@ dependencies = [
     "cryptography>=42.0.0",
     "python-multipart>=0.0.9",
     "pymongo>=4.6.0",
+    "pyjwt>=2.13.0",
 ]
 
 [project.optional-dependencies]

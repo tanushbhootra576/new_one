@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Activity, Bell, User } from "lucide-react";
 import { MedicationWidget } from "@/components/dashboard/MedicationWidget";
 import { AppointmentWidget } from "@/components/dashboard/AppointmentWidget";
@@ -13,6 +14,7 @@ import { useNotifications } from "@/contexts/NotificationContext";
 import type { PatientCard, MedicationSchedule, TimelineDay } from "@/types/models";
 
 export default function DashboardPage() {
+  const { user, logout } = useAuth();
   const [card, setCard] = useState<PatientCard | null>(null);
   const [schedules, setSchedules] = useState<MedicationSchedule[]>([]);
   const [adherenceScore, setAdherenceScore] = useState<number>(0);
@@ -60,6 +62,7 @@ export default function DashboardPage() {
           </div>
           
           <div className="flex items-center gap-3">
+            <button onClick={logout} className="text-sm text-red-500 hover:underline">Log out</button>
             <Link
               to="/notifications"
               className="relative rounded-full p-2 text-alan-text-muted hover:bg-alan-surface transition-colors"

@@ -59,6 +59,12 @@ Run the Vite development server in mock mode:
 make web
 ```
 
+### Doctor Dashboard Credentials
+
+To test the application as a doctor, log in using the following credentials:
+- **Email:** `doctor`
+- **Password:** `doctor123`
+
 Or run it connecting to the real API:
 
 ```bash

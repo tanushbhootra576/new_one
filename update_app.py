@@ -1,21 +1,22 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import UploadPage from "@/pages/UploadPage";
-import PlanPage from "@/pages/PlanPage";
-import PatientCardPage from "@/pages/PatientCardPage";
-import MedicationTrackerPage from "@/pages/MedicationTrackerPage";
-import TimelinePage from "@/pages/TimelinePage";
-import NotificationCenterPage from "@/pages/NotificationCenterPage";
-import DashboardPage from "@/pages/DashboardPage";
-import { NotificationProvider } from "@/contexts/NotificationContext";
+import re
 
+with open("web/src/App.tsx", "r") as f:
+    content = f.read()
+
+imports = """
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import DoctorDashboardPage from "@/pages/DoctorDashboardPage";
 import { UserRole } from "@/types/models";
+"""
 
+content = content.replace('import { NotificationProvider } from "@/contexts/NotificationContext";', 'import { NotificationProvider } from "@/contexts/NotificationContext";\n' + imports)
 
+# Wrap inside AuthProvider
+# Also create a RoleBasedRoute component to dynamically route "/" depending on role
+route_wrapper = """
 function HomeRoute() {
   const { user } = useAuth();
   if (user?.role === UserRole.DOCTOR) {
@@ -50,3 +51,9 @@ export default function App() {
     </AuthProvider>
   );
 }
+"""
+
+content = re.sub(r"export default function App\(\) \{.*\}", route_wrapper.strip(), content, flags=re.DOTALL)
+
+with open("web/src/App.tsx", "w") as f:
+    f.write(content)
